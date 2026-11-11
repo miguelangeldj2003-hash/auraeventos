@@ -23,8 +23,7 @@ import com.aura.eventos.sync.SyncUiState
 import com.aura.eventos.ui.theme.*
 
 /**
- * Barra delgada tipo Spotify: aparece pegada abajo cuando hay algo que sincronizar.
- * Al tocarla abre el detalle de lo que se subió.
+ * Barra delgada tipo Spotify:
  */
 @Composable
 fun SyncBar(state: SyncUiState, onClick: () -> Unit, modifier: Modifier = Modifier) {

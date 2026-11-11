@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <!-- usesCleartextTraffic="true" habilitado solo para pruebas de desarrollo local con http://IP:8080 -->
     <application
         android:name=".AuraApp"
         android:label="Aura Eventos"

@@ -1,7 +1,9 @@
 package com.aura.eventos.data.demo
 
+import android.content.Context
 import com.aura.eventos.data.local.SessionManager
 import com.aura.eventos.data.remote.*
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -10,6 +12,7 @@ import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.json.JSONObject
 import retrofit2.Response
+import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -24,7 +27,10 @@ import kotlin.math.max
  * panel), pero con datos en memoria. Sirve para presentar la app sin API ni base de datos.
  */
 @Singleton
-class FakeAuraApi @Inject constructor(private val session: SessionManager) : AuraApi {
+class FakeAuraApi @Inject constructor(
+    private val session: SessionManager,
+    @ApplicationContext private val ctx: Context
+) : AuraApi {
 
     private val lock = Any()
     private val categorias = listOf(
@@ -135,8 +141,8 @@ class FakeAuraApi @Inject constructor(private val session: SessionManager) : Aur
         val hoy = LocalDate.now()
         val ahora = LocalDateTime.now()
         fun r(id: Long, cli: Long, d1: Long, d2: Long, dir: String, ent: String, notas: String?, lat: Double?, lng: Double?,
-              est: String, flete: Double, motivo: String?, hace: Long, vararg items: Pair<Long, Int>) =
-            reservaciones.add(nueva(id, cli, hoy.plusDays(d1), hoy.plusDays(d2), dir, ent, notas, lat, lng, est, flete, motivo, ahora.minusHours(hace), items.toList()))
+              est: String, flete: Double, motivo: String?, hace: Long, vararg items: Pair<Number, Int>) =
+            reservaciones.add(nueva(id, cli, hoy.plusDays(d1), hoy.plusDays(d2), dir, ent, notas, lat, lng, est, flete, motivo, ahora.minusHours(hace), items.map { it.first.toLong() to it.second }))
         // Meses anteriores (llenan la gráfica de ingresos)
         r(700, 6, -75, -73, "Col. Roma Norte, CDMX", "INTERIOR", null, null, null, "APROBADO", 300.0, null, 1900, 12 to 1, 9 to 2, 1 to 1)
         r(710, 7, -45, -44, "Col. Condesa, CDMX", "EXTERIOR", null, null, null, "APROBADO", 450.0, null, 1200, 3 to 2, 6 to 1)
@@ -206,6 +212,22 @@ class FakeAuraApi @Inject constructor(private val session: SessionManager) : Aur
         if (i < 0) return@sim err(404, "Artículo no encontrado")
         val nuevo = aArticulo(id, r, articulos[i].activo) ?: return@sim err(404, "Categoría no encontrada")
         articulos[i] = nuevo; ok(conDatos(nuevo, null))
+    }
+
+    override suspend fun subirImagenArticulo(id: Long, foto: MultipartBody.Part): Response<ArticuloDto> = sim {
+        val i = articulos.indexOfFirst { it.id == id }
+        if (i < 0) return@sim err(404, "Artículo no encontrado")
+        val dir = File(ctx.filesDir, "articulos")
+        val list = dir.listFiles()
+        val rutaFoto = if (list != null && list.isNotEmpty()) {
+            list.maxByOrNull { it.lastModified() }?.absolutePath ?: articulos[i].imagenUrl
+        } else {
+            articulos[i].imagenUrl
+        }
+        if (rutaFoto != null) {
+            articulos[i] = articulos[i].copy(imagenUrl = rutaFoto)
+        }
+        ok(conDatos(articulos[i], null))
     }
 
     private fun estado(id: Long, activo: Boolean): Response<ArticuloDto> {

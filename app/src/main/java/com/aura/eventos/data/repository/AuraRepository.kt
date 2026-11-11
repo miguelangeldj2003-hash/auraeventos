@@ -6,6 +6,9 @@ import com.aura.eventos.data.remote.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import org.json.JSONObject
 import retrofit2.Response
 import java.io.File
@@ -94,6 +97,15 @@ class AuraRepository @Inject constructor(
     suspend fun adminArticulos() = llamar { api.adminArticulos() }.onSuccess { l -> l.forEach { articulosCache[it.id] = it } }
     suspend fun crearArticulo(r: ArticuloRequest) = llamar { api.crearArticulo(r) }
     suspend fun actualizarArticulo(id: Long, r: ArticuloRequest) = llamar { api.actualizarArticulo(id, r) }
+    suspend fun subirImagenArticulo(id: Long, fotoFile: File): Result<ArticuloDto> = withContext(Dispatchers.IO) {
+        try {
+            val reqFile = fotoFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            val part = MultipartBody.Part.createFormData("foto", fotoFile.name, reqFile)
+            llamar { api.subirImagenArticulo(id, part) }
+        } catch (e: Exception) {
+            Result.failure(ApiError(e.message ?: "No se pudo subir la foto del artículo"))
+        }
+    }
     suspend fun cambiarEstado(id: Long, activo: Boolean) = llamar { if (activo) api.alta(id) else api.baja(id) }
 
     // ---------- reservaciones ----------

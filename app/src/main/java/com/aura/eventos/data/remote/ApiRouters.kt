@@ -18,6 +18,7 @@ class AuraApiRouter(private val real: AuraApi, private val demo: AuraApi, privat
     override suspend fun adminArticulos(): Response<List<ArticuloDto>> = api().adminArticulos()
     override suspend fun crearArticulo(r: ArticuloRequest): Response<ArticuloDto> = api().crearArticulo(r)
     override suspend fun actualizarArticulo(id: Long, r: ArticuloRequest): Response<ArticuloDto> = api().actualizarArticulo(id, r)
+    override suspend fun subirImagenArticulo(id: Long, foto: MultipartBody.Part): Response<ArticuloDto> = api().subirImagenArticulo(id, foto)
     override suspend fun baja(id: Long): Response<ArticuloDto> = api().baja(id)
     override suspend fun alta(id: Long): Response<ArticuloDto> = api().alta(id)
     override suspend fun crearReservacion(r: ReservacionRequest): Response<ReservacionDto> = api().crearReservacion(r)

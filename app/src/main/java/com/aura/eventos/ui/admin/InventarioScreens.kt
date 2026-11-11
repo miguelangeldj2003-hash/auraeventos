@@ -1,5 +1,8 @@
 package com.aura.eventos.ui.admin
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,15 +20,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.aura.eventos.data.remote.ArticuloDto
 import com.aura.eventos.ui.components.*
 import com.aura.eventos.ui.theme.*
+import java.io.File
 
 // ============================================================
 //  Inventario de artículos
@@ -141,6 +148,16 @@ private fun AccionChica(texto: String, icono: androidx.compose.ui.graphics.vecto
 @Composable
 fun ArticuloFormScreen(onBack: () -> Unit, vm: ArticuloFormViewModel = hiltViewModel()) {
     val ui by vm.ui.collectAsStateWithLifecycle()
+    val ctx = LocalContext.current
+    val photoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let {
+            val file = ImageUtils.procesarImagenGaleria(ctx, it)
+            if (file != null) {
+                vm.onFotoElegida(file.absolutePath)
+            }
+        }
+    }
+
     LaunchedEffect(ui.guardado) { if (ui.guardado) onBack() }
 
     Scaffold(containerColor = AuraBg, topBar = { AuraTopBar(if (vm.esNuevo) "Nuevo artículo" else "Editar artículo", "Inventario", onBack = onBack) }) { pad ->
@@ -167,9 +184,84 @@ fun ArticuloFormScreen(onBack: () -> Unit, vm: ArticuloFormViewModel = hiltViewM
                         LabeledField("Tarifa por evento (MXN)", ui.precio, { v -> vm.cambiar { it.copy(precio = v.filter { c -> c.isDigit() || c == '.' }) } }, Modifier.weight(1f), "1200", KeyboardType.Decimal)
                         LabeledField("Stock total", ui.stock, { v -> vm.cambiar { it.copy(stock = v.filter { c -> c.isDigit() }) } }, Modifier.weight(1f), "10", KeyboardType.Number)
                     }
-                    LabeledField("URL de la foto (opcional)", ui.imagen, { v -> vm.cambiar { it.copy(imagen = v) } }, placeholder = "https://…")
                 }
             }
+
+            // Sección de Foto del Artículo (Photo Picker)
+            AuraCard {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SectionLabel("Foto del artículo")
+                    val tieneFoto = ui.photoPath != null || (!ui.currentImagenUrl.isNullOrBlank() && !ui.photoRemoved)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(AuraBg),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when {
+                            ui.photoPath != null -> {
+                                AsyncImage(
+                                    model = File(ui.photoPath!!),
+                                    contentDescription = "Foto seleccionada",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                            !ui.currentImagenUrl.isNullOrBlank() && !ui.photoRemoved -> {
+                                ArticuloImagen(
+                                    sku = ui.sku,
+                                    url = ui.currentImagenUrl,
+                                    nombre = ui.nombre,
+                                    dulces = ui.categoriaId != null && ui.categorias.firstOrNull { it.id == ui.categoriaId }?.seccion == "MESA_DULCES",
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                            else -> {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(Icons.Filled.AddAPhoto, null, tint = AuraFaint, modifier = Modifier.size(40.dp))
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("Sin foto seleccionada", style = MaterialTheme.typography.bodySmall, color = AuraMuted)
+                                }
+                            }
+                        }
+                    }
+
+                    if (tieneFoto) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            OutlineButton(
+                                "Cambiar foto",
+                                { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                                icon = Icons.Filled.PhotoLibrary,
+                                modifier = Modifier.weight(1f)
+                            )
+                            OutlineButton(
+                                "Quitar foto",
+                                vm::onQuitarFoto,
+                                icon = Icons.Filled.Delete,
+                                color = AuraRed,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    } else {
+                        OutlineButton(
+                            "Elegir foto de la galería",
+                            { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                            icon = Icons.Filled.PhotoLibrary,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    ui.photoError?.let { pErr ->
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            AuraBanner(Tipo.AVISO, "Aviso de foto", pErr)
+                            OutlineButton("Reintentar subir foto", vm::reintentarFoto, icon = Icons.Filled.Refresh)
+                        }
+                    }
+                }
+            }
+
             AuraCard {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SectionLabel("Especificaciones")
@@ -186,7 +278,7 @@ fun ArticuloFormScreen(onBack: () -> Unit, vm: ArticuloFormViewModel = hiltViewM
                 }
             }
             ui.error?.let { AuraBanner(Tipo.ERROR, it) }
-            PrimaryButton("Guardar artículo", vm::guardar, loading = ui.guardando, icon = Icons.Filled.Check)
+            PrimaryButton("Guardar artículo", vm::guardar, loading = ui.guardando || ui.guardandoFoto, icon = Icons.Filled.Check)
             Spacer(Modifier.height(12.dp))
         }
     }

@@ -1,5 +1,6 @@
 package com.aura.eventos.data.remote
 
+import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -70,6 +71,7 @@ interface AuraApi {
     @GET("api/admin/articulos") suspend fun adminArticulos(): Response<List<ArticuloDto>>
     @POST("api/admin/articulos") suspend fun crearArticulo(@Body r: ArticuloRequest): Response<ArticuloDto>
     @PUT("api/admin/articulos/{id}") suspend fun actualizarArticulo(@Path("id") id: Long, @Body r: ArticuloRequest): Response<ArticuloDto>
+    @Multipart @POST("api/admin/articulos/{id}/imagen") suspend fun subirImagenArticulo(@Path("id") id: Long, @Part foto: MultipartBody.Part): Response<ArticuloDto>
     @PATCH("api/admin/articulos/{id}/baja") suspend fun baja(@Path("id") id: Long): Response<ArticuloDto>
     @PATCH("api/admin/articulos/{id}/alta") suspend fun alta(@Path("id") id: Long): Response<ArticuloDto>
 
