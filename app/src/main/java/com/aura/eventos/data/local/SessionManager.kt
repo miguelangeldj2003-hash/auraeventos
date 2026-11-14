@@ -24,9 +24,16 @@ class SessionManager @Inject constructor(@ApplicationContext ctx: Context) {
     private val _session = MutableStateFlow(leer())
     val session: StateFlow<Session?> = _session.asStateFlow()
 
+    private val _base = MutableStateFlow(prefs.getString("base_url", null) ?: BuildConfig.BASE_URL)
+    val baseUrlFlow: StateFlow<String> = _base.asStateFlow()
+
     var baseUrl: String
         get() = prefs.getString("base_url", null) ?: BuildConfig.BASE_URL
-        set(valor) { prefs.edit().putString("base_url", normalizar(valor)).apply() }
+        set(valor) {
+            val norm = normalizar(valor)
+            prefs.edit().putString("base_url", norm).apply()
+            _base.value = norm
+        }
 
     // Mensaje de bienvenida que la pantalla principal muestra una vez (titulo|detalle)
     private val _aviso = MutableStateFlow<String?>(null)

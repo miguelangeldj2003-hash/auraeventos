@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId = "com.aura.eventos"
         minSdk = 26; targetSdk = 34
-        versionCode = 1; versionName = "26.1.0"
+        versionCode = 1; versionName = "1.0"
         // 10.0.2.2 = tu localhost desde el emulador. Cámbialo por la URL de tu backend Java.
         buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"")
     }

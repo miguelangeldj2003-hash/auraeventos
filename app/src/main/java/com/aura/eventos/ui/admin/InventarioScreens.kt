@@ -148,14 +148,8 @@ private fun AccionChica(texto: String, icono: androidx.compose.ui.graphics.vecto
 @Composable
 fun ArticuloFormScreen(onBack: () -> Unit, vm: ArticuloFormViewModel = hiltViewModel()) {
     val ui by vm.ui.collectAsStateWithLifecycle()
-    val ctx = LocalContext.current
     val photoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        uri?.let {
-            val file = ImageUtils.procesarImagenGaleria(ctx, it)
-            if (file != null) {
-                vm.onFotoElegida(file.absolutePath)
-            }
-        }
+        if (uri != null) vm.elegirFoto(uri)
     }
 
     LaunchedEffect(ui.guardado) { if (ui.guardado) onBack() }

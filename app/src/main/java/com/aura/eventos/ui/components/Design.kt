@@ -338,11 +338,24 @@ private val FOTOS = mapOf(
     "MC-001-ORO" to R.drawable.foto_mesa_candy
 )
 
+val LocalBaseUrl = staticCompositionLocalOf { "" }
+
 @Composable
 fun ArticuloImagen(sku: String?, url: String?, nombre: String, dulces: Boolean, modifier: Modifier = Modifier, mostrarNombre: Boolean = true) {
     val foto = sku?.let { FOTOS[it] }
+    val baseUrl = LocalBaseUrl.current
+    val model: Any? = remember(url, baseUrl) {
+        when {
+            url.isNullOrBlank() -> null
+            url.startsWith("/api/") -> baseUrl.trimEnd('/') + url
+            url.startsWith("http://") || url.startsWith("https://") -> url
+            java.io.File(url).exists() -> java.io.File(url)
+            url.startsWith("/") -> java.io.File(url)
+            else -> url
+        }
+    }
     when {
-        !url.isNullOrBlank() -> AsyncImage(model = url, contentDescription = nombre, contentScale = ContentScale.Crop, modifier = modifier)
+        model != null -> AsyncImage(model = model, contentDescription = nombre, contentScale = ContentScale.Crop, modifier = modifier)
         foto != null -> Image(painterResource(foto), nombre, modifier, contentScale = ContentScale.Crop)
         else -> Box(
             modifier.background(Brush.linearGradient(

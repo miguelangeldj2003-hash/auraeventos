@@ -10,6 +10,8 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okio.buffer
+import okio.sink
 import org.json.JSONObject
 import retrofit2.Response
 import java.io.File
@@ -217,15 +219,18 @@ class FakeAuraApi @Inject constructor(
     override suspend fun subirImagenArticulo(id: Long, foto: MultipartBody.Part): Response<ArticuloDto> = sim {
         val i = articulos.indexOfFirst { it.id == id }
         if (i < 0) return@sim err(404, "Artículo no encontrado")
-        val dir = File(ctx.filesDir, "articulos")
-        val list = dir.listFiles()
-        val rutaFoto = if (list != null && list.isNotEmpty()) {
-            list.maxByOrNull { it.lastModified() }?.absolutePath ?: articulos[i].imagenUrl
-        } else {
-            articulos[i].imagenUrl
-        }
-        if (rutaFoto != null) {
-            articulos[i] = articulos[i].copy(imagenUrl = rutaFoto)
+        val dir = File(ctx.filesDir, "articulos").apply { mkdirs() }
+        val archivo = File(dir, "art-$id-${System.currentTimeMillis()}.jpg")
+        try {
+            val sink = archivo.sink().buffer()
+            foto.body.writeTo(sink)
+            sink.flush()
+            sink.close()
+            articulos[i] = articulos[i].copy(imagenUrl = archivo.absolutePath)
+        } catch (e: Exception) {
+            val list = dir.listFiles()
+            val rutaFoto = list?.maxByOrNull { it.lastModified() }?.absolutePath
+            if (rutaFoto != null) articulos[i] = articulos[i].copy(imagenUrl = rutaFoto)
         }
         ok(conDatos(articulos[i], null))
     }

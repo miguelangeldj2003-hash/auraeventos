@@ -1,8 +1,11 @@
 package com.aura.eventos.ui.admin
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aura.eventos.data.local.ImagenUtil
 import com.aura.eventos.data.remote.ArticuloDto
 import com.aura.eventos.data.remote.ArticuloRequest
 import com.aura.eventos.data.remote.CategoriaDto
@@ -10,6 +13,7 @@ import com.aura.eventos.data.repository.AuraRepository
 import com.aura.eventos.ui.components.Tipo
 import com.aura.eventos.ui.components.ToastEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
@@ -70,12 +74,16 @@ data class FormUi(
     val photoRemoved: Boolean = false, val dimensiones: String = "", val material: String = "", val incluye: String = "",
     val peso: String = "", val mantenimiento: Boolean = false, val activo: Boolean = true,
     val categorias: List<CategoriaDto> = emptyList(), val cargando: Boolean = true, val guardando: Boolean = false,
-    val guardandoFoto: Boolean = false, val error: String? = null, val photoError: String? = null,
-    val guardado: Boolean = false, val articuloIdGuardado: Long? = null
+    val procesandoFoto: Boolean = false, val guardandoFoto: Boolean = false, val error: String? = null,
+    val photoError: String? = null, val guardado: Boolean = false, val articuloIdGuardado: Long? = null
 )
 
 @HiltViewModel
-class ArticuloFormViewModel @Inject constructor(savedState: SavedStateHandle, private val repo: AuraRepository) : ViewModel() {
+class ArticuloFormViewModel @Inject constructor(
+    savedState: SavedStateHandle,
+    private val repo: AuraRepository,
+    @ApplicationContext private val ctx: Context
+) : ViewModel() {
     val id: Long = savedState.get<Long>("id") ?: 0L
     val esNuevo get() = id == 0L
     private var original: ArticuloDto? = null
@@ -99,8 +107,16 @@ class ArticuloFormViewModel @Inject constructor(savedState: SavedStateHandle, pr
 
     fun cambiar(f: (FormUi) -> FormUi) = _ui.update { f(it).copy(error = null) }
 
-    fun onFotoElegida(path: String) {
-        _ui.update { it.copy(photoPath = path, photoRemoved = false, photoError = null) }
+    fun elegirFoto(uri: Uri) {
+        _ui.update { it.copy(procesandoFoto = true, photoError = null) }
+        viewModelScope.launch {
+            try {
+                val archivo = ImagenUtil.prepararDesdeUri(ctx, uri)
+                _ui.update { it.copy(procesandoFoto = false, photoPath = archivo.absolutePath, photoRemoved = false) }
+            } catch (e: Exception) {
+                _ui.update { it.copy(procesandoFoto = false, photoError = e.message ?: "Error al procesar la foto seleccionada") }
+            }
+        }
     }
 
     fun onQuitarFoto() {

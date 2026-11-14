@@ -98,6 +98,7 @@ private val tabsAdmin = listOf(
 @HiltViewModel
 class RootViewModel @Inject constructor(private val sessionManager: SessionManager) : ViewModel() {
     val session = sessionManager.session
+    val baseUrl = sessionManager.baseUrlFlow
     val aviso = sessionManager.aviso
     fun consumirAviso() = sessionManager.consumirAviso()
 }
@@ -118,6 +119,7 @@ private fun NavHostController.irTab(ruta: String) = navigate(ruta) {
 fun AuraNavHost(syncVm: SyncViewModel = hiltViewModel(), rootVm: RootViewModel = hiltViewModel()) {
     val nav = rememberNavController()
     val session by rootVm.session.collectAsStateWithLifecycle()
+    val baseUrl by rootVm.baseUrl.collectAsStateWithLifecycle()
     val aviso by rootVm.aviso.collectAsStateWithLifecycle()
     val sync by syncVm.uiState.collectAsStateWithLifecycle()
     val items by syncVm.items.collectAsStateWithLifecycle()
@@ -149,79 +151,81 @@ fun AuraNavHost(syncVm: SyncViewModel = hiltViewModel(), rootVm: RootViewModel =
     val enTab = session != null && tabs.any { it.ruta == ruta }
     val sinSubir = items.count { it.status != SyncStatus.SYNCED }
 
-    Scaffold(containerColor = AuraBg, snackbarHost = { ToastHost(host, Modifier.statusBarsPadding()) }, bottomBar = {
-        Column {
-            if (session?.demo == true) Surface(color = AuraNavy) {
-                Text("MODO DEMOSTRACIÓN · datos de ejemplo, sin servidor", color = AuraGold, fontWeight = FontWeight.Bold, fontSize = 10.sp,
-                    textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp))
-            }
-            // La barra de sincronización solo aplica al equipo que sube evidencias
-            if (esAdmin) SyncBar(state = sync, onClick = { verSync = true })
-            if (enTab) {
-                HorizontalDivider(color = AuraBorder)
-                NavigationBar(containerColor = Color.White, tonalElevation = 0.dp) {
-                    tabs.forEach { t ->
-                        NavigationBarItem(
-                            selected = ruta == t.ruta, onClick = { nav.irTab(t.ruta) },
-                            icon = { Icon(t.icono, t.titulo) }, label = { Text(t.titulo, fontSize = 11.sp, fontWeight = FontWeight.SemiBold) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = AuraGreenDark, selectedTextColor = AuraGreenDark, indicatorColor = AuraGreenSoft,
-                                unselectedIconColor = AuraMuted, unselectedTextColor = AuraMuted
+    CompositionLocalProvider(LocalBaseUrl provides baseUrl) {
+        Scaffold(containerColor = AuraBg, snackbarHost = { ToastHost(host, Modifier.statusBarsPadding()) }, bottomBar = {
+            Column {
+                if (session?.demo == true) Surface(color = AuraNavy) {
+                    Text("MODO DEMOSTRACIÓN · datos de ejemplo, sin servidor", color = AuraGold, fontWeight = FontWeight.Bold, fontSize = 10.sp,
+                        textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp))
+                }
+                // La barra de sincronización solo aplica al equipo que sube evidencias
+                if (esAdmin) SyncBar(state = sync, onClick = { verSync = true })
+                if (enTab) {
+                    HorizontalDivider(color = AuraBorder)
+                    NavigationBar(containerColor = Color.White, tonalElevation = 0.dp) {
+                        tabs.forEach { t ->
+                            NavigationBarItem(
+                                selected = ruta == t.ruta, onClick = { nav.irTab(t.ruta) },
+                                icon = { Icon(t.icono, t.titulo) }, label = { Text(t.titulo, fontSize = 11.sp, fontWeight = FontWeight.SemiBold) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = AuraGreenDark, selectedTextColor = AuraGreenDark, indicatorColor = AuraGreenSoft,
+                                    unselectedIconColor = AuraMuted, unselectedTextColor = AuraMuted
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
+        }) { pad ->
+            val idArg = listOf(navArgument("id") { type = NavType.LongType })
+            NavHost(nav, startDestination = Routes.SPLASH, modifier = Modifier.padding(pad)) {
+                // ---- splash ----
+                composable(Routes.SPLASH) {
+                    SplashScreen(onNavigateNext = {
+                        nav.navigate(inicial) { popUpTo(Routes.SPLASH) { inclusive = true } }
+                    })
+                }
+
+                // ---- acceso ----
+                composable(Routes.LOGIN) { LoginScreen(onRegistro = { nav.navigate(Routes.REGISTRO) }) }
+                composable(Routes.REGISTRO) { RegistroScreen(onBack = { nav.popBackStack() }, onLogin = { nav.popBackStack() }) }
+
+                // ---- cliente ----
+                composable(Routes.INICIO) {
+                    InicioScreen(onDetalle = { nav.navigate(Routes.solicitud(it)) }, onSolicitudes = { nav.irTab(Routes.SOLICITUDES) }, onCatalogo = { nav.irTab(Routes.CATALOGO) })
+                }
+                composable(Routes.CATALOGO) { CatalogoScreen(onArticulo = { nav.navigate(Routes.articulo(it)) }, onCarrito = { nav.navigate(Routes.CARRITO) }) }
+                composable(Routes.ARTICULO, idArg) { ArticuloDetalleScreen(onBack = { nav.popBackStack() }, onCarrito = { nav.navigate(Routes.CARRITO) }) }
+                composable(Routes.CARRITO) {
+                    CarritoScreen(onBack = { nav.popBackStack() }, onContinuar = { nav.navigate(Routes.RESERVA) }, onCatalogo = { nav.irTab(Routes.CATALOGO) })
+                }
+                composable(Routes.RESERVA) {
+                    ReservaScreen(onBack = { nav.popBackStack() }, onCreada = { id ->
+                        nav.navigate(Routes.exito(id)) { popUpTo(Routes.CARRITO) { inclusive = true } }
+                    })
+                }
+                composable(Routes.EXITO, idArg) {
+                    ExitoScreen(onInicio = { nav.irTab(Routes.INICIO) }, onCatalogo = { nav.irTab(Routes.CATALOGO) })
+                }
+                composable(Routes.SOLICITUDES) { SolicitudesScreen(onDetalle = { nav.navigate(Routes.solicitud(it)) }, onCatalogo = { nav.irTab(Routes.CATALOGO) }) }
+                composable(Routes.SOLICITUD, idArg) { SolicitudDetalleScreen(onBack = { nav.popBackStack() }) }
+
+                // ---- administradora / equipo de entrega ----
+                composable(Routes.PANEL) { PanelScreen(onDetalle = { nav.navigate(Routes.solicitud(it)) }, onAgenda = { nav.irTab(Routes.AGENDA) }) }
+                composable(Routes.AGENDA) { AgendaScreen(onDetalle = { nav.navigate(Routes.solicitud(it)) }) }
+                composable(Routes.INVENTARIO) { InventarioScreen(onEditar = { nav.navigate(Routes.articuloForm(it)) }) }
+                composable(Routes.ARTICULO_FORM, idArg) { ArticuloFormScreen(onBack = { nav.popBackStack() }) }
+                composable(Routes.ENTREGAS) { DeliveriesScreen(onOpen = { nav.navigate(Routes.capture(it)) }) }
+                composable(Routes.CAPTURE) { EvidenceCaptureScreen(onBack = { nav.popBackStack() }) }
+
+                composable(Routes.PERFIL) {
+                    PerfilScreen(pendientesSinSubir = sinSubir, onAcercaDe = { nav.navigate(Routes.ACERCA_DE) })
+                }
+                composable(Routes.ACERCA_DE) {
+                    AcercaDeScreen(onBack = { nav.popBackStack() })
+                }
+            }
         }
-    }) { pad ->
-        val idArg = listOf(navArgument("id") { type = NavType.LongType })
-        NavHost(nav, startDestination = Routes.SPLASH, modifier = Modifier.padding(pad)) {
-            // ---- splash ----
-            composable(Routes.SPLASH) {
-                SplashScreen(onNavigateNext = {
-                    nav.navigate(inicial) { popUpTo(Routes.SPLASH) { inclusive = true } }
-                })
-            }
-
-            // ---- acceso ----
-            composable(Routes.LOGIN) { LoginScreen(onRegistro = { nav.navigate(Routes.REGISTRO) }) }
-            composable(Routes.REGISTRO) { RegistroScreen(onBack = { nav.popBackStack() }, onLogin = { nav.popBackStack() }) }
-
-            // ---- cliente ----
-            composable(Routes.INICIO) {
-                InicioScreen(onDetalle = { nav.navigate(Routes.solicitud(it)) }, onSolicitudes = { nav.irTab(Routes.SOLICITUDES) }, onCatalogo = { nav.irTab(Routes.CATALOGO) })
-            }
-            composable(Routes.CATALOGO) { CatalogoScreen(onArticulo = { nav.navigate(Routes.articulo(it)) }, onCarrito = { nav.navigate(Routes.CARRITO) }) }
-            composable(Routes.ARTICULO, idArg) { ArticuloDetalleScreen(onBack = { nav.popBackStack() }, onCarrito = { nav.navigate(Routes.CARRITO) }) }
-            composable(Routes.CARRITO) {
-                CarritoScreen(onBack = { nav.popBackStack() }, onContinuar = { nav.navigate(Routes.RESERVA) }, onCatalogo = { nav.irTab(Routes.CATALOGO) })
-            }
-            composable(Routes.RESERVA) {
-                ReservaScreen(onBack = { nav.popBackStack() }, onCreada = { id ->
-                    nav.navigate(Routes.exito(id)) { popUpTo(Routes.CARRITO) { inclusive = true } }
-                })
-            }
-            composable(Routes.EXITO, idArg) {
-                ExitoScreen(onInicio = { nav.irTab(Routes.INICIO) }, onCatalogo = { nav.irTab(Routes.CATALOGO) })
-            }
-            composable(Routes.SOLICITUDES) { SolicitudesScreen(onDetalle = { nav.navigate(Routes.solicitud(it)) }, onCatalogo = { nav.irTab(Routes.CATALOGO) }) }
-            composable(Routes.SOLICITUD, idArg) { SolicitudDetalleScreen(onBack = { nav.popBackStack() }) }
-
-            // ---- administradora / equipo de entrega ----
-            composable(Routes.PANEL) { PanelScreen(onDetalle = { nav.navigate(Routes.solicitud(it)) }, onAgenda = { nav.irTab(Routes.AGENDA) }) }
-            composable(Routes.AGENDA) { AgendaScreen(onDetalle = { nav.navigate(Routes.solicitud(it)) }) }
-            composable(Routes.INVENTARIO) { InventarioScreen(onEditar = { nav.navigate(Routes.articuloForm(it)) }) }
-            composable(Routes.ARTICULO_FORM, idArg) { ArticuloFormScreen(onBack = { nav.popBackStack() }) }
-            composable(Routes.ENTREGAS) { DeliveriesScreen(onOpen = { nav.navigate(Routes.capture(it)) }) }
-            composable(Routes.CAPTURE) { EvidenceCaptureScreen(onBack = { nav.popBackStack() }) }
-
-            composable(Routes.PERFIL) {
-                PerfilScreen(pendientesSinSubir = sinSubir, onAcercaDe = { nav.navigate(Routes.ACERCA_DE) })
-            }
-            composable(Routes.ACERCA_DE) {
-                AcercaDeScreen(onBack = { nav.popBackStack() })
-            }
-        }
+        if (verSync) SyncDetailSheet(items, ultima, onRetry = syncVm::retryAll, onDismiss = { verSync = false })
     }
-    if (verSync) SyncDetailSheet(items, ultima, onRetry = syncVm::retryAll, onDismiss = { verSync = false })
 }

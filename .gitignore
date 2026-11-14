@@ -6,3 +6,7 @@
 /build/
 /app/build/
 /captures/
+.env
+*.jks
+*.keystore
+*.apk
