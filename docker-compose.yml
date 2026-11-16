@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: aura-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: aura_eventos
+      MYSQL_USER: aura
+      MYSQL_PASSWORD: AuraSecurePassword123!
+      MYSQL_ROOT_PASSWORD: RootSecurePassword123!
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/aura_eventos.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+
+  api:
+    build:
+      context: ./api/aura-api
+      dockerfile: Dockerfile
+    container_name: aura-api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysqldb:3306/aura_eventos?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USER: aura
+      DB_PASS: AuraSecurePassword123!
+      JWT_SECRET: SuperSecretJwtKeyForAuraEventosApp2026SecureKeyMustBeAtLeast256BitsLong!
+    depends_on:
+      - mysqldb
+
+volumes:
+  mysql_data:

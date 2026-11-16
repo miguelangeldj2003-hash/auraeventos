@@ -19,11 +19,14 @@ CREATE TABLE IF NOT EXISTS usuarios (
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Cuentas de ejemplo por defecto
-INSERT INTO usuarios (id, nombre, correo, password, telefono, rol) VALUES
-(1, 'Ana Martínez', 'ana@aura.com', '$2a$10$e8T7tZg0H7H1J4x7Q4E.LeXw.X1zK5.H7H1J4x7Q4E.LeXw.X1zK5', '55 1234 5678', 'ADMIN'),
-(2, 'María García López', 'maria@gmail.com', '$2a$10$e8T7tZg0H7H1J4x7Q4E.LeXw.X1zK5.H7H1J4x7Q4E.LeXw.X1zK5', '55 9876 5432', 'CLIENTE')
-ON DUPLICATE KEY UPDATE id=id;
+-- Cuentas de ejemplo por defecto (Idempotente)
+INSERT INTO usuarios (id, nombre, correo, password, telefono, rol)
+SELECT 1, 'Ana Martínez', 'ana@aura.com', '$2a$10$e8T7tZg0H7H1J4x7Q4E.LeXw.X1zK5.H7H1J4x7Q4E.LeXw.X1zK5', '55 1234 5678', 'ADMIN'
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM usuarios WHERE id = 1 OR correo = 'ana@aura.com');
+
+INSERT INTO usuarios (id, nombre, correo, password, telefono, rol)
+SELECT 2, 'María García López', 'maria@gmail.com', '$2a$10$e8T7tZg0H7H1J4x7Q4E.LeXw.X1zK5.H7H1J4x7Q4E.LeXw.X1zK5', '55 9876 5432', 'CLIENTE'
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM usuarios WHERE id = 2 OR correo = 'maria@gmail.com');
 
 -- ------------------------------------------------------------
 -- Tabla: categorias
@@ -34,16 +37,14 @@ CREATE TABLE IF NOT EXISTS categorias (
     seccion VARCHAR(50) NOT NULL -- 'MOBILIARIO' o 'MESA_DULCES'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO categorias (id, nombre, seccion) VALUES
-(1, 'Sillas & Mesas', 'MOBILIARIO'),
-(2, 'Lounges', 'MOBILIARIO'),
-(3, 'Iluminación & Letreros', 'MOBILIARIO'),
-(4, 'Arcos & Florales', 'MOBILIARIO'),
-(5, 'Candy Bar', 'MESA_DULCES'),
-(6, 'Stands & Bases', 'MESA_DULCES'),
-(7, 'Fondue & Fuentes', 'MESA_DULCES'),
-(8, 'Mesas Candy', 'MESA_DULCES')
-ON DUPLICATE KEY UPDATE id=id;
+INSERT INTO categorias (id, nombre, seccion) SELECT 1, 'Sillas & Mesas', 'MOBILIARIO' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE id = 1);
+INSERT INTO categorias (id, nombre, seccion) SELECT 2, 'Lounges', 'MOBILIARIO' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE id = 2);
+INSERT INTO categorias (id, nombre, seccion) SELECT 3, 'Iluminación & Letreros', 'MOBILIARIO' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE id = 3);
+INSERT INTO categorias (id, nombre, seccion) SELECT 4, 'Arcos & Florales', 'MOBILIARIO' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE id = 4);
+INSERT INTO categorias (id, nombre, seccion) SELECT 5, 'Candy Bar', 'MESA_DULCES' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE id = 5);
+INSERT INTO categorias (id, nombre, seccion) SELECT 6, 'Stands & Bases', 'MESA_DULCES' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE id = 6);
+INSERT INTO categorias (id, nombre, seccion) SELECT 7, 'Fondue & Fuentes', 'MESA_DULCES' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE id = 7);
+INSERT INTO categorias (id, nombre, seccion) SELECT 8, 'Mesas Candy', 'MESA_DULCES' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE id = 8);
 
 -- ------------------------------------------------------------
 -- Tabla: articulos
@@ -67,14 +68,29 @@ CREATE TABLE IF NOT EXISTS articulos (
     CONSTRAINT fk_articulos_categoria FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO articulos (id, categoria_id, nombre, descripcion, precio_base, stock_total, sku, dimensiones, material, incluye, peso_max) VALUES
-(1, 1, 'Sillas Chiavari Blancas x10', 'Set de 10 sillas con cojín satinado. Perfectas para ceremonias y banquetes formales.', 2400.0, 15, 'SC-004-BLA', '0.92m de alto', 'Madera lacada', 'Cojín satinado', '120 kg'),
-(2, 1, 'Mesa Rectangular Rústica', 'Mesa de madera para 8 personas.', 380.0, 12, 'SC-010-RUS', '2.4m × 0.9m', 'Madera de pino', 'Montaje', '150 kg'),
-(3, 2, 'Set Lounge Blanco Moderno', 'Sofá 3 plazas, 2 sillones y mesa de centro. Ideal para áreas VIP y lounges de eventos.', 3500.0, 6, 'SL-005-BLA', '3.2m × 1.8m', 'Piel sintética blanca', 'Mesa de centro', '250 kg'),
-(4, 3, 'Letrero LED "LOVE" Rosa', 'Letrero neón flexible con cable 3m. Brillo ajustable. Ideal para fondos fotográficos.', 650.0, 5, 'LN-003-ROS', '1.2m × 0.5m', 'Neón LED flexible', 'Cable 3m', '2 kg'),
-(8, 5, 'Carrito Vintage para Dulces', 'Carrito de madera blanca con ruedas doradas. Incluye faldón y decoración base.', 1800.0, 3, 'CB-006-VIN', '1.2m × 0.6m × 1.4m', 'Madera lacada', 'Faldón y decoración', '60 kg'),
-(12, 8, 'Mesa Candy Premium Dorada Deluxe', 'Mesa decorativa de madera blanca con herrajes dorados. Perfecta para exposición de postres, dulces y bebidas.', 1200.0, 12, 'MC-001-ORO', '1.8m × 0.6m × 0.9m', 'MDF lacado blanco', 'Montaje + desmontaje', '80 kg')
-ON DUPLICATE KEY UPDATE id=id;
+INSERT INTO articulos (id, categoria_id, nombre, descripcion, precio_base, stock_total, sku, dimensiones, material, incluye, peso_max)
+SELECT 1, 1, 'Sillas Chiavari Blancas x10', 'Set de 10 sillas con cojín satinado. Perfectas para ceremonias y banquetes formales.', 2400.0, 15, 'SC-004-BLA', '0.92m de alto', 'Madera lacada', 'Cojín satinado', '120 kg'
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM articulos WHERE id = 1);
+
+INSERT INTO articulos (id, categoria_id, nombre, descripcion, precio_base, stock_total, sku, dimensiones, material, incluye, peso_max)
+SELECT 2, 1, 'Mesa Rectangular Rústica', 'Mesa de madera para 8 personas.', 380.0, 12, 'SC-010-RUS', '2.4m × 0.9m', 'Madera de pino', 'Montaje', '150 kg'
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM articulos WHERE id = 2);
+
+INSERT INTO articulos (id, categoria_id, nombre, descripcion, precio_base, stock_total, sku, dimensiones, material, incluye, peso_max)
+SELECT 3, 2, 'Set Lounge Blanco Moderno', 'Sofá 3 plazas, 2 sillones y mesa de centro. Ideal para áreas VIP y lounges de eventos.', 3500.0, 6, 'SL-005-BLA', '3.2m × 1.8m', 'Piel sintética blanca', 'Mesa de centro', '250 kg'
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM articulos WHERE id = 3);
+
+INSERT INTO articulos (id, categoria_id, nombre, descripcion, precio_base, stock_total, sku, dimensiones, material, incluye, peso_max)
+SELECT 4, 3, 'Letrero LED "LOVE" Rosa', 'Letrero neón flexible con cable 3m. Brillo ajustable. Ideal para fondos fotográficos.', 650.0, 5, 'LN-003-ROS', '1.2m × 0.5m', 'Neón LED flexible', 'Cable 3m', '2 kg'
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM articulos WHERE id = 4);
+
+INSERT INTO articulos (id, categoria_id, nombre, descripcion, precio_base, stock_total, sku, dimensiones, material, incluye, peso_max)
+SELECT 8, 5, 'Carrito Vintage para Dulces', 'Carrito de madera blanca con ruedas doradas. Incluye faldón y decoración base.', 1800.0, 3, 'CB-006-VIN', '1.2m × 0.6m × 1.4m', 'Madera lacada', 'Faldón y decoración', '60 kg'
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM articulos WHERE id = 8);
+
+INSERT INTO articulos (id, categoria_id, nombre, descripcion, precio_base, stock_total, sku, dimensiones, material, incluye, peso_max)
+SELECT 12, 8, 'Mesa Candy Premium Dorada Deluxe', 'Mesa decorativa de madera blanca con herrajes dorados. Perfecta para exposición de postres, dulces y bebidas.', 1200.0, 12, 'MC-001-ORO', '1.8m × 0.6m × 0.9m', 'MDF lacado blanco', 'Montaje + desmontaje', '80 kg'
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM articulos WHERE id = 12);
 
 -- ------------------------------------------------------------
 -- Tabla: reservaciones
@@ -102,15 +118,34 @@ CREATE TABLE IF NOT EXISTS reservaciones (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
--- Tabla: detalles_reservacion
+-- Tabla: reservacion_detalle
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS detalles_reservacion (
+CREATE TABLE IF NOT EXISTS reservacion_detalle (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     reservacion_id BIGINT NOT NULL,
     articulo_id BIGINT NOT NULL,
     cantidad INT NOT NULL,
     precio_unitario DOUBLE NOT NULL,
     subtotal DOUBLE NOT NULL,
-    CONSTRAINT fk_detalles_reservacion FOREIGN KEY (reservacion_id) REFERENCES reservaciones(id) ON DELETE CASCADE,
-    CONSTRAINT fk_detalles_articulo FOREIGN KEY (articulo_id) REFERENCES articulos(id)
+    CONSTRAINT fk_reservacion_detalle_res FOREIGN KEY (reservacion_id) REFERENCES reservaciones(id) ON DELETE CASCADE,
+    CONSTRAINT fk_reservacion_detalle_art FOREIGN KEY (articulo_id) REFERENCES articulos(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- Tabla: evidencias
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS evidencias (
+    id VARCHAR(100) PRIMARY KEY, -- UUID
+    event_folio VARCHAR(50) NOT NULL,
+    type VARCHAR(30) NOT NULL, -- ENTREGA, RECOLECCION, DANO, ANTES
+    photo_path TEXT NOT NULL,
+    comment TEXT,
+    latitude DOUBLE,
+    longitude DOUBLE,
+    accuracy_meters FLOAT,
+    captured_at BIGINT NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- PENDING, UPLOADING, SYNCED, FAILED
+    synced_at BIGINT,
+    attempts INT DEFAULT 0,
+    last_error TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
