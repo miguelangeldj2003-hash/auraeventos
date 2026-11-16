@@ -1,7 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-    <!-- casita blanca de la marca, dentro de la zona segura del ícono adaptable -->
-    <path android:fillColor="#FFFFFF"
-        android:pathData="M54,32 L33,51 L39,51 L39,74 L49,74 L49,60 L59,60 L59,74 L69,74 L69,51 L75,51 Z" />
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group
+        android:scaleX="0.85"
+        android:scaleY="0.85"
+        android:pivotX="54"
+        android:pivotY="54">
+
+        <!-- 1. Estrella de 4 puntos superior (Navy) -->
+        <path
+            android:fillColor="#0B1B32"
+            android:pathData="M 54,23 L 55.6,26.4 L 59,28 L 55.6,29.6 L 54,33 L 52.4,29.6 L 49,28 L 52.4,26.4 Z" />
+
+        <!-- 2. Arcos exteriores de la red -->
+        <!-- Arco izquierdo (Navy) -->
+        <path
+            android:strokeColor="#0B1B32"
+            android:strokeWidth="3"
+            android:strokeLineCap="round"
+            android:pathData="M 33.5,41.5 A 25,25 0 0,0 33.5,60.5" />
+
+        <!-- Arco derecho (Teal) -->
+        <path
+            android:strokeColor="#12B88F"
+            android:strokeWidth="3"
+            android:strokeLineCap="round"
+            android:pathData="M 74.5,41.5 A 25,25 0 0,1 74.5,60.5" />
+
+        <!-- Arcos superiores conectores -->
+        <path
+            android:strokeColor="#0B1B32"
+            android:strokeWidth="2.5"
+            android:strokeLineCap="round"
+            android:pathData="M 36,40 C 44,34 64,34 72,40" />
+
+        <!-- Líneas diagonales internas -->
+        <path
+            android:strokeColor="#0B1B32"
+            android:strokeWidth="2.2"
+            android:strokeLineCap="round"
+            android:pathData="M 34,56 L 48,37" />
+
+        <path
+            android:strokeColor="#12B88F"
+            android:strokeWidth="2.2"
+            android:strokeLineCap="round"
+            android:pathData="M 74,56 L 60,37" />
+
+        <!-- Nodos de la red esférica -->
+        <path android:fillColor="#0B1B32" android:pathData="M 34,56 m -2.8,0 a 2.8,2.8 0 1,0 5.6,0 a 2.8,2.8 0 1,0 -5.6,0" />
+        <path android:fillColor="#0B1B32" android:pathData="M 38,39 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0" />
+        <path android:fillColor="#12B88F" android:pathData="M 74,56 m -2.8,0 a 2.8,2.8 0 1,0 5.6,0 a 2.8,2.8 0 1,0 -5.6,0" />
+        <path android:fillColor="#12B88F" android:pathData="M 70,39 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0" />
+        <path android:fillColor="#12B88F" android:pathData="M 54,34 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0" />
+
+        <!-- 3. Estructura inferior de la A (Navy) -->
+        <path
+            android:strokeColor="#0B1B32"
+            android:strokeWidth="3"
+            android:strokeLineCap="round"
+            android:pathData="M 32,70 C 42,80 66,80 76,70" />
+
+        <!-- Pata izquierda de A (Navy) -->
+        <path
+            android:strokeColor="#0B1B32"
+            android:strokeWidth="3.5"
+            android:strokeLineCap="round"
+            android:pathData="M 37,79 L 54,49" />
+
+        <!-- Pata derecha de A (Navy) -->
+        <path
+            android:strokeColor="#0B1B32"
+            android:strokeWidth="3.5"
+            android:strokeLineCap="round"
+            android:pathData="M 71,79 L 54,49" />
+
+        <!-- Nodos de la A -->
+        <path android:fillColor="#0B1B32" android:pathData="M 37,79 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0" />
+        <path android:fillColor="#0B1B32" android:pathData="M 54,49 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0" />
+        <path android:fillColor="#12B88F" android:pathData="M 71,79 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0" />
+
+        <!-- Flecha verde esmeralda ascendente (Teal) -->
+        <path
+            android:strokeColor="#12B88F"
+            android:strokeWidth="3.8"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 43,74 L 51,68 L 66,50" />
+
+        <!-- Punta de la flecha (Teal) -->
+        <path
+            android:fillColor="#12B88F"
+            android:pathData="M 66,50 L 60,51 L 64,56 Z" />
+
+    </group>
 </vector>
