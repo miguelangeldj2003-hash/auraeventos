@@ -32,20 +32,204 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.aura.eventos.R
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.sp
 import com.aura.eventos.ui.theme.*
 
 // ============================================================
-//  Marca
+//  Marca y Logo Oficial Aura Eventos
 // ============================================================
 @Composable
-fun AuraLogo(modifier: Modifier = Modifier, onDark: Boolean = false) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(30.dp).clip(RoundedCornerShape(9.dp)).background(AuraGreen), contentAlignment = Alignment.Center) {
-            Icon(Icons.Filled.Home, null, tint = Color.White, modifier = Modifier.size(18.dp))
+fun AuraLogoGraphic(
+    modifier: Modifier = Modifier,
+    navyColor: Color = AuraNavy,
+    tealColor: Color = AuraGreen
+) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val cx = w / 2f
+        val cy = h / 2f
+        val strokeWidth = w * 0.045f
+
+        // 1. Estrella de 4 puntos superior
+        val starCx = cx
+        val starCy = h * 0.10f
+        val outerR = w * 0.07f
+        val innerR = w * 0.022f
+        val starPath = Path().apply {
+            moveTo(starCx, starCy - outerR)
+            lineTo(starCx + innerR, starCy - innerR)
+            lineTo(starCx + outerR, starCy)
+            lineTo(starCx + innerR, starCy + innerR)
+            lineTo(starCx, starCy + outerR)
+            lineTo(starCx - innerR, starCy + innerR)
+            lineTo(starCx - outerR, starCy)
+            lineTo(starCx - innerR, starCy - innerR)
+            close()
         }
-        Spacer(Modifier.width(8.dp))
-        Text("AURA", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = if (onDark) Color.White else AuraNavy)
+        drawPath(starPath, color = navyColor)
+
+        // 2. Arcos y red esférica exterior
+        val arcRadius = w * 0.38f
+        val globeCenterY = h * 0.42f
+
+        drawArc(
+            color = navyColor,
+            startAngle = 140f,
+            sweepAngle = 160f,
+            useCenter = false,
+            topLeft = Offset(cx - arcRadius, globeCenterY - arcRadius),
+            size = Size(arcRadius * 2, arcRadius * 2),
+            style = Stroke(width = strokeWidth)
+        )
+
+        drawArc(
+            color = tealColor,
+            startAngle = 240f,
+            sweepAngle = 160f,
+            useCenter = false,
+            topLeft = Offset(cx - arcRadius, globeCenterY - arcRadius),
+            size = Size(arcRadius * 2, arcRadius * 2),
+            style = Stroke(width = strokeWidth)
+        )
+
+        drawLine(
+            color = navyColor,
+            start = Offset(cx - arcRadius * 0.8f, globeCenterY + arcRadius * 0.2f),
+            end = Offset(cx - arcRadius * 0.2f, globeCenterY - arcRadius * 0.7f),
+            strokeWidth = strokeWidth * 0.8f
+        )
+        drawLine(
+            color = tealColor,
+            start = Offset(cx + arcRadius * 0.8f, globeCenterY + arcRadius * 0.2f),
+            end = Offset(cx + arcRadius * 0.2f, globeCenterY - arcRadius * 0.7f),
+            strokeWidth = strokeWidth * 0.8f
+        )
+
+        val nodes = listOf(
+            Offset(cx - arcRadius * 0.85f, globeCenterY + arcRadius * 0.2f) to navyColor,
+            Offset(cx - arcRadius * 0.6f, globeCenterY - arcRadius * 0.6f) to navyColor,
+            Offset(cx + arcRadius * 0.85f, globeCenterY + arcRadius * 0.2f) to tealColor,
+            Offset(cx + arcRadius * 0.6f, globeCenterY - arcRadius * 0.6f) to tealColor,
+            Offset(cx, globeCenterY - arcRadius * 0.85f) to tealColor
+        )
+        for ((pos, col) in nodes) {
+            drawCircle(color = col, radius = strokeWidth * 1.1f, center = pos)
+        }
+
+        // 3. Estructura "A" con flecha verde esmeralda ascendente
+        val aBaseY = h * 0.84f
+        val aTopY = h * 0.38f
+
+        drawArc(
+            color = navyColor,
+            startAngle = 30f,
+            sweepAngle = 120f,
+            useCenter = false,
+            topLeft = Offset(cx - w * 0.35f, aBaseY - h * 0.15f),
+            size = Size(w * 0.70f, h * 0.25f),
+            style = Stroke(width = strokeWidth)
+        )
+
+        drawLine(
+            color = navyColor,
+            start = Offset(cx - w * 0.28f, aBaseY),
+            end = Offset(cx, aTopY),
+            strokeWidth = strokeWidth * 1.1f
+        )
+
+        drawLine(
+            color = navyColor,
+            start = Offset(cx + w * 0.28f, aBaseY),
+            end = Offset(cx, aTopY),
+            strokeWidth = strokeWidth * 1.1f
+        )
+
+        val arrowStart = Offset(cx - w * 0.18f, aBaseY - h * 0.08f)
+        val arrowMid = Offset(cx - w * 0.05f, aBaseY - h * 0.18f)
+        val arrowTip = Offset(cx + w * 0.22f, aBaseY - h * 0.38f)
+
+        val arrowPath = Path().apply {
+            moveTo(arrowStart.x, arrowStart.y)
+            lineTo(arrowMid.x, arrowMid.y)
+            lineTo(arrowTip.x, arrowTip.y)
+        }
+        drawPath(arrowPath, color = tealColor, style = Stroke(width = strokeWidth * 1.2f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+
+        val headSize = w * 0.09f
+        val arrowHeadPath = Path().apply {
+            moveTo(arrowTip.x, arrowTip.y)
+            lineTo(arrowTip.x - headSize * 0.8f, arrowTip.y + headSize * 0.2f)
+            lineTo(arrowTip.x - headSize * 0.2f, arrowTip.y + headSize * 0.8f)
+            close()
+        }
+        drawPath(arrowHeadPath, color = tealColor)
+
+        drawCircle(color = navyColor, radius = strokeWidth * 1.1f, center = Offset(cx - w * 0.28f, aBaseY))
+        drawCircle(color = navyColor, radius = strokeWidth * 1.1f, center = Offset(cx, aTopY))
+        drawCircle(color = tealColor, radius = strokeWidth * 1.1f, center = Offset(cx + w * 0.28f, aBaseY))
+    }
+}
+
+@Composable
+fun AuraLogo(modifier: Modifier = Modifier, onDark: Boolean = false) {
+    val navyCol = if (onDark) Color.White else AuraNavy
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        AuraLogoGraphic(
+            modifier = Modifier.size(34.dp),
+            navyColor = navyCol,
+            tealColor = AuraGreen
+        )
+        Spacer(Modifier.width(10.dp))
+        Text("AURA", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = navyCol)
         Text(" EVENTOS", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = AuraGreen)
+    }
+}
+
+@Composable
+fun AuraFullLogo(
+    modifier: Modifier = Modifier,
+    onDark: Boolean = false
+) {
+    val navyCol = if (onDark) Color.White else AuraNavy
+    val tealCol = AuraGreen
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        AuraLogoGraphic(
+            modifier = Modifier.size(76.dp),
+            navyColor = navyCol,
+            tealColor = tealCol
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(
+                text = "AURA",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 3.sp
+                ),
+                color = navyCol
+            )
+            Text(
+                text = "E V E N T O S",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 6.sp
+                ),
+                color = if (onDark) Color.White.copy(alpha = 0.9f) else AuraNavy
+            )
+        }
     }
 }
 
