@@ -7,7 +7,7 @@ Plataforma móvil para la gestión y renta de mobiliario y mesas de dulces para 
 | Rol | Correo | Contraseña |
 |---|---|---|
 | **Cliente** | `maria@gmail.com` | `Maria123*` |
-| **Administradora** | `ana@aura.com` | `Admin123!` |
+| **Administradora** | `ana@aura.com` | `AdminClave123*` |
 
 *Las cuentas de prueba aparecen en tarjetas al pie de la pantalla de Login; al tocarlas se rellenan automáticamente los campos.*
 

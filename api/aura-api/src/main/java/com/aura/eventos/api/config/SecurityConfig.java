@@ -1,11 +1,6 @@
 package com.aura.eventos.api.config;
 
-import com.aura.eventos.api.model.RolUsuario;
-import com.aura.eventos.api.model.Usuario;
-import com.aura.eventos.api.repository.UsuarioRepository;
 import com.aura.eventos.api.security.JwtFilter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -69,26 +64,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
         return source;
-    }
-
-    @Bean
-    public CommandLineRunner initDatabase(
-            UsuarioRepository usuarioRepository,
-            PasswordEncoder passwordEncoder,
-            @Value("${aura.admin.correo:admin@aura.com}") String adminCorreo,
-            @Value("${aura.admin.password:Admin123!}") String adminPassword
-    ) {
-        return args -> {
-            if (!usuarioRepository.existsByCorreoIgnoreCase(adminCorreo)) {
-                Usuario admin = new Usuario(
-                        "Administradora Aura",
-                        adminCorreo,
-                        passwordEncoder.encode(adminPassword),
-                        "55 1234 5678",
-                        RolUsuario.ADMIN
-                );
-                usuarioRepository.save(admin);
-            }
-        };
     }
 }

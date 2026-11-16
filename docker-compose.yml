@@ -7,14 +7,19 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: aura_eventos
-      MYSQL_USER: aura
-      MYSQL_PASSWORD: AuraSecurePassword123!
-      MYSQL_ROOT_PASSWORD: RootSecurePassword123!
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
     ports:
       - "3306:3306"
     volumes:
-      - ./db/aura_eventos.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/aura_eventos.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   api:
     build:
@@ -25,12 +30,19 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DB_URL: jdbc:mysql://mysqldb:3306/aura_eventos?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      DB_USER: aura
-      DB_PASS: AuraSecurePassword123!
-      JWT_SECRET: SuperSecretJwtKeyForAuraEventosApp2026SecureKeyMustBeAtLeast256BitsLong!
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_CORREO: ${ADMIN_CORREO}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      STORAGE_PATH: ${STORAGE_PATH:-/data/fotos}
+    volumes:
+      - fotos:/data/fotos
     depends_on:
-      - mysqldb
+      mysqldb:
+        condition: service_healthy
 
 volumes:
   mysql_data:
+  fotos:

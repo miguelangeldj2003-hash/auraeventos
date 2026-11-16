@@ -24,7 +24,7 @@ object CuentasDemo {
     const val CLIENTE_CORREO = "maria@gmail.com"
     const val CLIENTE_PASSWORD = "Maria123*"
     const val ADMIN_CORREO = "ana@aura.com"
-    const val ADMIN_PASSWORD = "Admin123!"
+    const val ADMIN_PASSWORD = "AdminClave123*"
 }
 
 @Singleton

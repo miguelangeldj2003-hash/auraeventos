@@ -12,7 +12,7 @@ Acceso: usa las cuentas de prueba que aparecen abajo en el login (se rellenan al
 6. Escribe dirección, notas, **Usar mi ubicación actual** y **Enviar solicitud** → pantalla "¡Solicitud Enviada!".
 7. **Solicitudes:** pendiente (nota bloqueada), rechazada (con motivo) y aprobada → **Descargar nota de remisión (PDF)**.
 
-## 2. Administradora (ana@aura.com / Admin123!)
+## 2. Administradora (ana@aura.com / AdminClave123*)
 1. **Panel:** ingresos del mes, gráfica de 6 meses, top de artículos, solicitudes recientes, entregas de hoy.
 2. **Agenda → Pendientes:** abre una → pon el flete (obligatorio) → **Aprobar** → aparece "Nota de Remisión Lista".
    Otra → motivo → **Rechazar**.
