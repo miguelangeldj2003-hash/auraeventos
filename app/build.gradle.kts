@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -5,20 +8,70 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
+
+val keystorePropertiesFile = rootProject.file("keystore.properties").takeIf { it.exists() }
+    ?: file("keystore.properties").takeIf { it.exists() }
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile != null && keystorePropertiesFile.exists()) {
+        load(FileInputStream(keystorePropertiesFile))
+    }
+}
+
 android {
     namespace = "com.aura.eventos"
-    compileSdk = 34
+    compileSdk = 35
+
     defaultConfig {
         applicationId = "com.aura.eventos"
-        minSdk = 26; targetSdk = 34
-        versionCode = 1; versionName = "1.0"
-        // 10.0.2.2 = tu localhost desde el emulador. Cámbialo por la URL de tu backend Java.
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 2
+        versionName = "1.2.0"
         buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"")
     }
-    buildFeatures { compose = true; buildConfig = true }
-    compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
-    kotlinOptions { jvmTarget = "17" }
+
+    signingConfigs {
+        create("release") {
+            val alias = keystoreProperties.getProperty("keyAlias")
+            val keyPass = keystoreProperties.getProperty("keyPassword")
+            val storePath = keystoreProperties.getProperty("storeFile")
+            val storePass = keystoreProperties.getProperty("storePassword")
+
+            if (alias.isNullOrBlank() || keyPass.isNullOrBlank() || storePath.isNullOrBlank() || storePass.isNullOrBlank()) {
+                throw GradleException("Error: No se encontró el archivo 'keystore.properties' o faltan propiedades (keyAlias, keyPassword, storeFile, storePassword). Copia 'keystore.properties.example' a 'keystore.properties' y configura tus credenciales de release.")
+            }
+
+            keyAlias = alias
+            keyPassword = keyPass
+            storeFile = rootProject.file(storePath)
+            storePassword = storePass
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
+
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
     implementation(composeBom)
@@ -51,4 +104,7 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
+
+    // Pruebas unitarias
+    testImplementation("junit:junit:4.13.2")
 }

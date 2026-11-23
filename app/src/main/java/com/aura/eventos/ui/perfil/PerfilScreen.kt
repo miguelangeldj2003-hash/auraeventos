@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.aura.eventos.data.demo.FakeAuraApi
 import com.aura.eventos.data.local.SessionManager
 import com.aura.eventos.data.repository.AuraRepository
 import com.aura.eventos.ui.auth.DialogoServidor
@@ -27,11 +26,10 @@ import javax.inject.Inject
 @HiltViewModel
 class PerfilViewModel @Inject constructor(
     val session: SessionManager,
-    private val repo: AuraRepository,
-    private val demo: FakeAuraApi
+    private val repo: AuraRepository
 ) : ViewModel() {
     fun cerrarSesion() = repo.cerrarSesion()
-    fun reiniciarDemo() = demo.reiniciar()
+    fun reiniciarDemo() = repo.reiniciarDemo()
 }
 
 @Composable

@@ -1,6 +1,7 @@
 package com.aura.eventos.data.repository
 
 import android.content.Context
+import com.aura.eventos.data.demo.FakeAuraApi
 import com.aura.eventos.data.local.SessionManager
 import com.aura.eventos.data.remote.*
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,8 +32,10 @@ object CuentasDemo {
 class AuraRepository @Inject constructor(
     private val api: AuraApi,
     private val session: SessionManager,
+    private val demo: FakeAuraApi,
     @ApplicationContext private val ctx: Context
 ) {
+    fun reiniciarDemo() = demo.reiniciar()
     // Convierte cualquier respuesta/fallo en un Result con un mensaje entendible para el usuario
     private suspend fun <T> llamar(bloque: suspend () -> Response<T>): Result<T> = try {
         val r = bloque()
