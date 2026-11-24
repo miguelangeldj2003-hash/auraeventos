@@ -1,22 +1,26 @@
-# Aura Eventos — Plan de Pruebas y Manual Técnico (v1.2.0)
+# Aura Eventos — Plan de Pruebas y Manual Técnico (v1.2.1)
 
 ---
 
 ## PARTE 1: PLAN DE PRUEBAS Y RESULTADOS DE EJECUCIÓN
 
-### Pruebas Unitarias (`./gradlew test`)
+### Pruebas Unitarias (`./gradlew testDebugUnitTest --rerun-tasks`)
 
-**Salida de ejecucion del comando:**
+**Salida real de ejecución del comando:**
 ```text
 > Task :app:testDebugUnitTest
+
 com.aura.eventos.AuraUnitTest > testUT01_ivaSoloSobreSubtotal PASSED
 com.aura.eventos.AuraUnitTest > testUT02_totalEsSubtotalMasIvaMasFlete PASSED
 com.aura.eventos.AuraUnitTest > testUT03_correoInvalido PASSED
 com.aura.eventos.AuraUnitTest > testUT04_contrasenaInvalidaSieteCaracteres PASSED
 com.aura.eventos.AuraUnitTest > testUT05_noPedirMasDeLoLibreEnCualquierDiaDelRango PASSED
 
-BUILD SUCCESSFUL in 8s
-63 actionable tasks: 63 up-to-date
+Finished generating test XML results into: app/build/test-results/testDebugUnitTest
+Finished generating test HTML results into: app/build/reports/tests/testDebugUnitTest
+
+BUILD SUCCESSFUL in 1m 40s
+31 actionable tasks: 31 executed
 ```
 - **Total de pruebas unitarias:** 5
 - **Pruebas pasadas:** 5 (100 %)
@@ -34,44 +38,44 @@ BUILD SUCCESSFUL in 8s
 
 ### Casos de Prueba Funcionales (CP-01 a CP-34)
 
-*Entorno de pruebas:* Emulador Android API 36 ejecutando el APK de Release firmado (`app-release.apk`) en modo demostración. Los casos que requieren interacción con el backend Java/Docker se indican como "No probado" al no estar activo el servidor.
+*Criterio de estado:* Se marca **Aprobado** únicamente si se cuenta con captura de pantalla PNG real almacenada en `docs/evidencias/`. Los pasos validados visualmente sin captura se marcan **Validado manualmente (sin captura)**. Los casos que requieren interacción con el backend en vivo se indican como **No probado**.
 
 | ID | Caso de Prueba | Descripción / Pasos | Resultado Real | Estado | Evidencia |
 |---|---|---|---|---|---|
-| **CP-01** | Login Cliente Demo | Seleccionar tarjeta demo Cliente (`maria@gmail.com`) e Iniciar Sesión. | Acceso correcto al Dashboard de Cliente con tarjetas de resumen e historial. | **Aprobado** | [`CP-01_login_cliente.txt`](evidencias/README.md) |
-| **CP-02** | Login Admin Demo | Seleccionar tarjeta demo Admin (`ana@aura.com`) e Iniciar Sesión. | Acceso correcto al Panel de Control con métricas de ingresos, solicitudes y gráfica. | **Aprobado** | [`CP-02_login_admin.txt`](evidencias/README.md) |
-| **CP-03** | Credenciales inválidas | Ingresar correo no registrado o clave errónea en modo demo. | Muestra mensaje de error claro solicitando verificar credenciales. | **Aprobado** | Validado |
-| **CP-04** | Registro en servidor real | Registrar nuevo usuario mediante API REST remota. | Pendiente de verificación: requiere servidor backend Docker en ejecución. | **No probado** | Sin servidor activo |
-| **CP-05** | Validación contraseña corta | Intentar registrarse con clave de 7 caracteres. | El botón permanece deshabilitado y se muestra aviso de longitud mínima (>=8). | **Aprobado** | Validado |
-| **CP-06** | Olvidó contraseña | Pulsar "¿Olvidaste tu contraseña?" en login. | Abre diálogo informando contactar a la administradora para restablecimiento. | **Aprobado** | Validado |
-| **CP-07** | Navegación Catálogo | Cambiar entre "Mobiliario y Decoración" y "Mesas de Dulces". | La interfaz conmuta de sección mostrando los artículos correspondientes. | **Aprobado** | Validado |
-| **CP-08** | Filtro y búsqueda | Filtrar por categoría (ej. Sillas & Mesas) y buscar por texto. | La lista se actualiza instantáneamente con las coincidencias. | **Aprobado** | Validado |
-| **CP-09** | Detalle de artículo | Presionar una tarjeta de artículo. | Abre vista con especificaciones, dimensiones, material y botón de favorito. | **Aprobado** | Validado |
-| **CP-10** | Favoritos | Tocar el ícono de corazón en un artículo. | El artículo se agrega a la lista de favoritos en el perfil del cliente. | **Aprobado** | Validado |
-| **CP-11** | Agregar al carrito | Seleccionar cantidad de unidades y presionar "Agregar". | El contador del carrito en la barra superior se incrementa. | **Aprobado** | Validado |
-| **CP-12** | Gestión del carrito | Modificar cantidades con `+` / `-` o eliminar un ítem. | El subtotal, IVA y total estimado se recalculan automáticamente. | **Aprobado** | Validado |
-| **CP-13** | Visualización Calendario | Abrir selector de fechas en el flujo de reserva. | Días sin stock suficiente se muestran en gris ("No disponible"). | **Aprobado** | Validado |
-| **CP-14** | Validación de conflicto fecha | Intentar seleccionar un día gris bloqueado en el calendario. | La app impide la selección e informa que las fechas están ocupadas. | **Aprobado** | [`CP-14_conflicto_calendario.txt`](evidencias/README.md) |
-| **CP-15** | Selección rango fecha | Seleccionar fecha de entrega (toque 1) y recogida (toque 2). | El rango se resalta en verde y habilita el botón de continuar. | **Aprobado** | Validado |
-| **CP-16** | Formulario de reserva | Ingresar dirección de entrega, tipo de entorno y ubicación GPS. | Los campos se capturan correctamente y habilitan "Enviar solicitud". | **Aprobado** | Validado |
-| **CP-17** | Confirmar reservación | Presionar "Enviar solicitud". | Muestra pantalla de éxito con el folio asignado (ej. `#AUR-2026-0847`). | **Aprobado** | Validado |
-| **CP-18** | Solicitudes pendientes | Ir a pestaña "Solicitudes" como cliente. | Muestra la tarjeta en estado `PENDIENTE` con el flete por asignar. | **Aprobado** | [`CP-18_solicitudes_pendientes.txt`](evidencias/README.md) |
-| **CP-19** | Aprobar solicitud (Admin) | En Agenda Admin, ingresar flete obligatorio y presionar "Aprobar". | La solicitud pasa a estado `APROBADO` y calcula el total final. | **Aprobado** | Validado |
-| **CP-20** | Rechazar solicitud (Admin) | En Agenda Admin, ingresar motivo y presionar "Rechazar". | La solicitud pasa a estado `RECHAZADO` con el motivo visible para el cliente. | **Aprobado** | Validado |
-| **CP-21** | Descarga Nota PDF | En detalle de solicitud aprobada, presionar "Descargar nota (PDF)". | Genera el documento PDF y lo abre en el visor del sistema con la remisión formal. | **Aprobado** | [`CP-21_nota_remision_pdf.txt`](evidencias/README.md) |
-| **CP-22** | Dashboard Admin | Revisar resumen financiero y top de rentas en Panel. | Se visualizan las métricas actualizadas y la gráfica de ingresos de 6 meses. | **Aprobado** | Validado |
-| **CP-23** | Búsqueda en Inventario | En pestaña Inventario Admin, buscar por SKU o nombre. | Filtra los elementos del almacén de forma inmediata. | **Aprobado** | Validado |
-| **CP-24** | Alta de artículo con foto | Presionar "+ Agregar artículo" y seleccionar foto vía Photo Picker. | El artículo se registra con sus especificaciones y foto seleccionada de galería. | **Aprobado** | Validado |
-| **CP-25** | Edición de artículo | Presionar "Editar" en un artículo e invocar Photo Picker. | Abre Android Photo Picker oficial (`com.google.android.photopicker`). | **Aprobado** | [`CP-25_photo_picker.txt`](evidencias/README.md) |
-| **CP-26** | Baja de artículo | Presionar "Deshabilitar" en un artículo activo. | Cambia el estado a inactivo y actualiza el contador de artículos activos. | **Aprobado** | Validado |
-| **CP-27** | Entregas del día | Ir a pestaña "Entregas" en el menú de la Administradora. | Lista las solicitudes aprobadas programadas para entrega o recolección. | **Aprobado** | Validado |
-| **CP-28** | Captura de evidencia | En Entregas, capturar fotografía y obtener coordenadas GPS. | Muestra la vista previa con la ubicación detectada. | **Aprobado** | Validado |
-| **CP-29** | Persistencia local evidencia | Presionar "Guardar evidencia". | La evidencia se almacena en la base de datos `Room` local. | **Aprobado** | Validado |
-| **CP-30** | Sincronización en línea | Subida de evidencias locales al backend remoto. | Pendiente de verificación: requiere servidor backend Docker en ejecución. | **No probado** | Sin servidor activo |
-| **CP-31** | Modo Avión (Offline) | Activar modo avión y guardar evidencia. | Muestra la barra ámbar: "Sin conexión · 1 guardado en el teléfono". | **Aprobado** | Validado |
-| **CP-32** | Sincronización diferida | Desactivar modo avión tras guardar en offline. | Muestra "Subiendo 1 de 1…" y luego la barra verde "Todo sincronizado". | **Aprobado** | Validado |
-| **CP-33** | Configurar Servidor | Probar la conexión en vivo con un backend remoto. | Pendiente de verificación: requiere servidor backend Docker en ejecución. | **No probado** | Sin servidor activo |
-| **CP-34** | Cierre de sesión seguro | Intentar cerrar sesión con evidencias pendientes sin subir. | Muestra diálogo de advertencia informando que las evidencias se conservan. | **Aprobado** | Validado |
+| **CP-01** | Login Cliente Demo | Seleccionar tarjeta demo Cliente (`maria@gmail.com`) e Iniciar Sesión. | Acceso correcto al Dashboard de Cliente con tarjetas de resumen. | **Aprobado** | [`CP-01_login_cliente.png`](evidencias/CP-01_login_cliente.png) |
+| **CP-02** | Login Admin Demo | Seleccionar tarjeta demo Admin (`ana@aura.com`) e Iniciar Sesión. | Acceso correcto al Perfil y Panel de Administradora. | **Aprobado** | [`CP-02_login_admin.png`](evidencias/CP-02_login_admin.png) |
+| **CP-03** | Credenciales inválidas | Ingresar correo no registrado o clave errónea en modo demo. | Muestra mensaje de error solicitando verificar credenciales. | **Validado manualmente (sin captura)** | N/A |
+| **CP-04** | Registro en servidor real | Registrar nuevo usuario mediante API REST remota. | Pendiente de verificación: requiere servidor backend Docker activo. | **No probado** | Sin servidor activo |
+| **CP-05** | Validación contraseña corta | Intentar registrarse con clave de 7 caracteres. | El botón permanece deshabilitado y exige mínimo 8 caracteres. | **Validado manualmente (sin captura)** | N/A |
+| **CP-06** | Olvidó contraseña | Pulsar "¿Olvidaste tu contraseña?" en login. | Abre diálogo informando contactar a la administradora. | **Validado manualmente (sin captura)** | N/A |
+| **CP-07** | Navegación Catálogo | Cambiar entre "Mobiliario y Decoración" y "Mesas de Dulces". | Conmuta de sección mostrando los artículos correspondientes. | **Validado manualmente (sin captura)** | N/A |
+| **CP-08** | Filtro y búsqueda | Filtrar por categoría (ej. Sillas & Mesas) y buscar por texto. | Actualiza la lista con las coincidencias. | **Validado manualmente (sin captura)** | N/A |
+| **CP-09** | Detalle de artículo | Presionar una tarjeta de artículo. | Abre vista con especificaciones y dimensiones. | **Validado manualmente (sin captura)** | N/A |
+| **CP-10** | Favoritos | Tocar el ícono de corazón en un artículo. | Agrega el artículo a la lista de favoritos en Perfil. | **Validado manualmente (sin captura)** | N/A |
+| **CP-11** | Agregar al carrito | Seleccionar cantidad de unidades y presionar "Agregar". | El contador del carrito se incrementa. | **Validado manualmente (sin captura)** | N/A |
+| **CP-12** | Gestión del carrito | Modificar cantidades con `+` / `-` o eliminar un ítem. | Recalcula subtotal, IVA y total estimado. | **Validado manualmente (sin captura)** | N/A |
+| **CP-13** | Visualización Calendario | Abrir selector de fechas en el flujo de reserva. | Días sin stock suficiente se muestran en gris ("No disponible"). | **Validado manualmente (sin captura)** | N/A |
+| **CP-14** | Validación de conflicto fecha | Intentar seleccionar un día gris bloqueado en el calendario. | La app impide la selección de los días 1 al 21 en gris. | **Aprobado** | [`CP-14_conflicto_calendario.png`](evidencias/CP-14_conflicto_calendario.png) |
+| **CP-15** | Selección rango fecha | Seleccionar fecha de entrega (toque 1) y recogida (toque 2). | Resalta el rango en verde y habilita continuar. | **Validado manualmente (sin captura)** | N/A |
+| **CP-16** | Formulario de reserva | Ingresar dirección de entrega, tipo de entorno y ubicación GPS. | Captura dirección y coordenadas correctamente. | **Validado manualmente (sin captura)** | N/A |
+| **CP-17** | Confirmar reservación | Presionar "Enviar solicitud". | Genera folio de reservación (ej. `#AUR-2026-0847`). | **Validado manualmente (sin captura)** | N/A |
+| **CP-18** | Solicitudes pendientes | Ir a pestaña "Solicitudes" como cliente. | Lista las solicitudes en estado PENDIENTE con flete por asignar. | **Aprobado** | [`CP-18_solicitudes_pendientes.png`](evidencias/CP-18_solicitudes_pendientes.png) |
+| **CP-19** | Aprobar solicitud (Admin) | En Agenda Admin, ingresar flete y presionar "Aprobar". | Cambia estado a APROBADO y calcula total final. | **Validado manualmente (sin captura)** | N/A |
+| **CP-20** | Rechazar solicitud (Admin) | En Agenda Admin, ingresar motivo y presionar "Rechazar". | Cambia estado a RECHAZADO especificando el motivo. | **Validado manualmente (sin captura)** | N/A |
+| **CP-21** | Descarga Nota PDF | En detalle de solicitud aprobada, presionar "Descargar nota (PDF)". | Genera y abre `nota-AUR-2026-0801.pdf` en el visor del sistema. | **Aprobado** | [`CP-21_nota_remision_pdf.png`](evidencias/CP-21_nota_remision_pdf.png) |
+| **CP-22** | Dashboard Admin | Revisar resumen financiero y top de rentas en Panel. | Muestra métricas e ingresos de 6 meses. | **Validado manualmente (sin captura)** | N/A |
+| **CP-23** | Búsqueda en Inventario | En pestaña Inventario Admin, buscar por SKU o nombre. | Filtra los elementos del almacén. | **Validado manualmente (sin captura)** | N/A |
+| **CP-24** | Alta de artículo con foto | Presionar "+ Agregar artículo" y seleccionar foto. | Abre el selector para registrar artículo. | **Validado manualmente (sin captura)** | N/A |
+| **CP-25** | Edición de artículo | Presionar "Editar" e invocar Photo Picker. | Abre `com.google.android.photopicker` para seleccionar foto. | **Aprobado** | [`CP-25_photo_picker.png`](evidencias/CP-25_photo_picker.png) |
+| **CP-26** | Baja de artículo | Presionar "Deshabilitar" en un artículo activo. | Cambia estado a inactivo y actualiza contadores. | **Validado manualmente (sin captura)** | N/A |
+| **CP-27** | Entregas del día | Ir a pestaña "Entregas" en el menú de la Administradora. | Lista solicitudes programadas para entrega. | **Validado manualmente (sin captura)** | N/A |
+| **CP-28** | Captura de evidencia | En Entregas, capturar fotografía y coordenadas GPS. | Muestra vista previa con ubicación detectada. | **Validado manualmente (sin captura)** | N/A |
+| **CP-29** | Persistencia local evidencia | Presionar "Guardar evidencia". | Almacena evidencia en la base `Room` local. | **Validado manualmente (sin captura)** | N/A |
+| **CP-30** | Sincronización en línea | Subida de evidencias locales al backend remoto. | Pendiente de verificación: requiere servidor backend Docker activo. | **No probado** | Sin servidor activo |
+| **CP-31** | Modo Avión (Offline) | Activar modo avión y guardar evidencia. | Muestra indicador SyncBar en ámbar. | **Validado manualmente (sin captura)** | N/A |
+| **CP-32** | Sincronización diferida | Desactivar modo avión tras guardar en offline. | Muestra progreso de sincronización y pasa a verde. | **Validado manualmente (sin captura)** | N/A |
+| **CP-33** | Configurar Servidor | Probar conexión en vivo con backend remoto. | Pendiente de verificación: requiere servidor backend Docker activo. | **No probado** | Sin servidor activo |
+| **CP-34** | Cierre de sesión seguro | Intentar cerrar sesión con evidencias pendientes. | Muestra diálogo de advertencia informando resguardo. | **Validado manualmente (sin captura)** | N/A |
 
 ---
 
@@ -79,8 +83,8 @@ BUILD SUCCESSFUL in 8s
 
 | Fecha | Componente | Descripción de la Falla | Corrección Aplicada (`fix:`) | Re-prueba |
 |---|---|---|---|---|
-| 23/11/2026 | `PerfilScreen` / `AuraRepository` | El ViewModel consumía `FakeAuraApi` directamente rompiendo la arquitectura MVVM pura. | Refactor a `AuraRepository` para exponer `reiniciarDemo()`. Se aplicó `fix: refactor PerfilViewModel to use AuraRepository`. | Aprobado |
-| 23/11/2026 | `app/build.gradle.kts` | Falta de firmado en `assembleRelease` por ruta relativa de `storeFile`. | Se ajustó a `rootProject.file(storePath)` para resolver correctamente `aura-release.jks`. | Aprobado |
+| 23/11/2026 | `PerfilScreen` / `AuraRepository` | El ViewModel consumía `FakeAuraApi` directamente rompiendo la arquitectura MVVM pura. | Refactor a `AuraRepository` para exponer `reiniciarDemo()`. Commit `f569a8a`. | Aprobado |
+| 23/11/2026 | `app/build.gradle.kts` | Falta de firmado en `assembleRelease` por ruta relativa de `storeFile`. | Se ajustó a `rootProject.file(storePath)` para resolver correctamente `aura-release.jks`. Commit `f569a8a`. | Aprobado |
 
 ---
 

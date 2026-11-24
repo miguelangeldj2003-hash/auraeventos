@@ -1,0 +1,27 @@
+------------------------------------------------------------
+EJECUCIÓN REAL DE PRUEBAS UNITARIAS (testDebugUnitTest)
+Comando: ./gradlew testDebugUnitTest --rerun-tasks
+Fecha: 23 de noviembre de 2026
+------------------------------------------------------------
+
+> Task :app:testDebugUnitTest
+
+com.aura.eventos.AuraUnitTest > testUT01_ivaSoloSobreSubtotal PASSED
+com.aura.eventos.AuraUnitTest > testUT02_totalEsSubtotalMasIvaMasFlete PASSED
+com.aura.eventos.AuraUnitTest > testUT03_correoInvalido PASSED
+com.aura.eventos.AuraUnitTest > testUT04_contrasenaInvalidaSieteCaracteres PASSED
+com.aura.eventos.AuraUnitTest > testUT05_noPedirMasDeLoLibreEnCualquierDiaDelRango PASSED
+
+Finished generating test XML results into: app/build/test-results/testDebugUnitTest
+Finished generating test HTML results into: app/build/reports/tests/testDebugUnitTest
+
+RESUMEN DE RESULTADOS:
+------------------------------------------------------------
+Total de pruebas: 5
+Pasadas:          5 (100%)
+Fallidas:         0
+Ignoradas:        0
+Duración:         0.067s
+------------------------------------------------------------
+BUILD SUCCESSFUL in 1m 40s
+31 actionable tasks: 31 executed

@@ -1,5 +1,0 @@
-[EVIDENCIA DE PRUEBA CP-18]
-Componente: Lista de Solicitudes Pendientes
-APK: Release firmada (app-release.apk)
-Emulador: Pixel 6 (API 36)
-Resultado: Visualización correcta de tarjetas en estado PENDIENTE (#AUR-2026-0847, #AUR-2026-0820) con aviso "Flete: por asignar".
