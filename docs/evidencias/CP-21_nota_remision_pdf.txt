@@ -1,0 +1,5 @@
+[EVIDENCIA DE PRUEBA CP-21]
+Componente: Generación y apertura de Nota de Remisión PDF
+APK: Release firmada (app-release.apk)
+Emulador: Pixel 6 (API 36)
+Resultado: Al presionar "Descargar nota (PDF)" en la solicitud aprobada #AUR-2026-0801, se generó el archivo 'nota-AUR-2026-0801.pdf' en cacheDir y se abrió correctamente en el visor PDF nativo del sistema con la plantilla formal (membrete AURA EVENTOS, desglose de subtotal $5,900, IVA $944, flete $450, total $7,294, y firmas).

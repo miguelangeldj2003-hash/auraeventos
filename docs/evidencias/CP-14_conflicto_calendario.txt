@@ -1,0 +1,5 @@
+[EVIDENCIA DE PRUEBA CP-14]
+Componente: Validación de fechas ocupadas en Calendario
+APK: Release firmada (app-release.apk)
+Emulador: Pixel 6 (API 36)
+Resultado: Con 3 Carritos Vintage agregados al carrito, los días 1 al 21 se muestran deshabilitados en gris ("No disponible") debido a falta de stock libre. Toque en día 10 rechazado correctamente.

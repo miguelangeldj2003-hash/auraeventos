@@ -1,0 +1,5 @@
+[EVIDENCIA DE PRUEBA CP-25]
+Componente: Edición de artículo en Inventario + Photo Picker
+APK: Release firmada (app-release.apk)
+Emulador: Pixel 6 (API 36)
+Resultado: Al presionar "Elegir foto de la galería" en el formulario de edición de artículo, se abrió de forma nativa la actividad del Android Photo Picker oficial ('com.google.android.photopicker/com.android.photopicker.MainActivity') para la selección segura de imágenes de la galería sin requerir permisos de almacenamiento masivo.

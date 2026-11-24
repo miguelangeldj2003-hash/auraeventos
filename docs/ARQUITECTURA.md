@@ -39,7 +39,7 @@
    - `BaseUrlInterceptor` redirige las peticiones al endpoint configurado (`http://10.0.2.2:8080/api/`).
    - Envía la solicitud HTTP POST a `/api/reservaciones`.
 5. **Respuesta y Servidor / Demo**:
-   - El backend Spring Boot valida los datos, verifica disponibilidad en base de datos PostgreSQL y crea la reservación retornando el DTO.
+   - El backend Spring Boot valida los datos, verifica disponibilidad en base de datos MySQL 8 y crea la reservación retornando el DTO.
    - En modo demostración (sin conexión), `AuraApiRouter` redirige a `FakeAuraApi` simulando la persistencia.
 6. **Actualización de la Interfaz**:
    - `AuraRepository` retorna `Result.success(dto)` al ViewModel.

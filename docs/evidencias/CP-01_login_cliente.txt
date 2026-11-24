@@ -1,0 +1,6 @@
+[EVIDENCIA DE PRUEBA CP-01]
+Componente: Login Cliente Demo
+APK: Release firmada (app-release.apk)
+Emulador: Pixel 6 (API 36)
+Resultado: Acceso exitoso a Dashboard de Cliente con credenciales maria@gmail.com / Maria123*.
+Métricas visibles: 2 solicitudes pendientes, 2 eventos aprobados, $9,334 total invertido.

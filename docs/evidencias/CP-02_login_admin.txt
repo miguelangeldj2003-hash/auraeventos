@@ -1,0 +1,6 @@
+[EVIDENCIA DE PRUEBA CP-02]
+Componente: Login Administradora Demo
+APK: Release firmada (app-release.apk)
+Emulador: Pixel 6 (API 36)
+Resultado: Acceso exitoso a Panel de Control con credenciales ana@aura.com / AdminClave123*.
+Métricas visibles: $14,200 ingresos del mes, 5 solicitudes pendientes, 7 eventos confirmados, gráfica de 6 meses.

@@ -53,7 +53,7 @@ Plataforma móvil para la gestión y renta de mobiliario y mesas de dulces para 
 
 ## Cómo Levantar el Servidor Backend (Docker Compose)
 
-El backend en Spring Boot + PostgreSQL se despliega mediante Docker:
+El backend en Spring Boot + MySQL 8 se despliega mediante Docker:
 
 1. Crear el archivo `.env` en la raíz del proyecto backend basado en `.env.example`.
 2. Levantar el contenedor:
@@ -76,7 +76,7 @@ El backend en Spring Boot + PostgreSQL se despliega mediante Docker:
 
 ```text
 aura-android/
-├── app/                                  # Aplicación Android
+├── app/                                  # Aplicación Android (Solo Kotlin)
 │   ├── src/main/java/com/aura/eventos/
 │   │   ├── data/                         # Repositorios, DTOs, Room DB y Demo API
 │   │   ├── di/                           # Módulos Hilt (AppModule)
@@ -87,11 +87,22 @@ aura-android/
 ├── docs/                                 # Documentación técnica y legal
 │   ├── ARQUITECTURA.md                   # Diagrama de capas y flujo de caso de uso
 │   ├── PLAN_DE_PRUEBAS_Y_MANUAL_TECNICO.md # Resultados de pruebas y manual de usuario/técnico
-│   └── PRIVACIDAD.md                     # Política de privacidad
+│   ├── PRIVACIDAD.md                     # Política de privacidad
+│   └── evidencias/                       # Registros de evidencias de prueba
 ├── api/aura-api/                         # Servidor backend Java Spring Boot
 ├── keystore.properties.example           # Plantilla de configuración de firma
 └── docker-compose.yml                    # Orquestador Docker
 ```
+
+---
+
+## Seguridad y Secretos en el Historial
+
+> **Aviso de Seguridad:** En revisiones anteriores del historial de Git (commit `9d672d9` y anteriores), existieron valores por defecto utilizados durante la fase inicial de desarrollo (como `DB_PASS=AuraSecurePassword123!`, `JWT_SECRET=SuperSecretJwtKey...` y `ADMIN_PASSWORD=Admin123!`). 
+> 
+> **Estas claves quedaron en el historial de Git y deben considerarse comprometidas.**
+> 
+> En cualquier despliegue real en producción o servidores staging, es **estrictamente obligatorio** definir claves nuevas y únicas en el archivo `.env` del servidor backend.
 
 ---
 
